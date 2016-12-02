@@ -4,6 +4,7 @@ import ConfigUtil from './server/utils/configUtil';
 import UserManager from './server/managers/userManager';
 import Server from './server';
 
+
 function main() {
   let key,
     value,
