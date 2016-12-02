@@ -11,6 +11,11 @@ import BaseApiController from './baseApiController';
 import ChangeTrackingManager from '../../managers/changeTrackingManager';
 import FabricManager from '../../managers/fabricManager';
 import Constants from '../../constants.js';
+import ChangeTrackingService from '../../services/changeTrackingService';
+import FabricService from '../../services/fabricService';
+import AppUtils from '../../utils/appUtils';
+
+
 
 /**
  * @desc - if there is changeTracking data present, the data is checked against the timpstamp
@@ -20,76 +25,79 @@ import Constants from '../../constants.js';
  */
 
 router.get('/api/v2/instance/changes/id/:ID/token/:Token/timestamp/:TimeStamp', BaseApiController.checkUserExistance, (req, res) => {
-  var milliseconds = new Date().getTime();
-  var instanceId = req.params.ID;
-  var timeStamp = req.params.TimeStamp;
+  var params = {},
+      newLastActive = new Date().getTime(),
 
-  if (timeStamp.length < 1) {
-    timeStamp = 0;
-  }
+      findInstanceProps={
+        setProperty: 'changeData',
+        error: 'Error: Cannot find any instance with input id.'
+      },
 
-  ChangeTrackingManager.findByInstanceId(instanceId)
-    .then((changeData) => {
+        fabricConfig = {
+            lastActive: newLastActive
+        };
 
-        var changes = {
+      params=req.params;
+      params.instanceId=params.ID;
+      params.bodyParams=fabricConfig;
+      params.changes = {
           config: false,
           containerlist: false,
           containerconfig: false,
           routing: false,
           registeries: false
         };
+  
+  if (params.TimeStamp.length < 1) {
+        params.TimeStamp = 0;
+  }
 
-        if (changeData) {
+  async.waterfall([
+     async.apply(ChangeTrackingService.findByInstanceId, findInstanceProps, params),
+     async.apply(checkChanges),
+     async.apply(FabricService.updateFabrics)
 
-          if (changeData.config > timeStamp) {
-            changes.config = true;
-          }
+  ], function(err, result) {
 
-          if (changeData.containerList > timeStamp) {
-            changes.containerlist = true;
-          }
-
-          if (changeData.containerConfig > timeStamp) {
-            changes.containerconfig = true;
-          }
-
-          if (changeData.routing > timeStamp) {
-            changes.routing = true;
-          }
-
-          if (changeData.registeries > timeStamp) {
-            changes.registeries = true;
-          }
-
-          var newLastActive = new Date().getTime();
-
-          var fabricConfig = {
-            lastActive: newLastActive
-          };
-
-          // Updates the fabric with the fabricConfig based on the fabrics instanceId
-          FabricManager.updateFabricConfig(instanceId, fabricConfig)
-            .then(function(rowUpdated) {
-              if (rowUpdated > 0) {
-                console.log("row Successfully Updated");
-              }
-            }, function(err) {
-
-            });
-        }
-
-        res.status(200);
-        res.send({
-          "status": "ok",
-          "timestamp": new Date().getTime(),
-          "changes": changes
-        });
-      },
-      (err) => {
-        callback('error', Constants.MSG.SYSTEM_ERROR);
-      });
-
+     AppUtils.sendResponse(res, err, 'changes', params.changes, result);
+    
+    });
 });
 
+ function checkChanges(params, callback) {
+ //      if (params.changeData) {
+ 
+          if (params.changeData.config > params.TimeStamp) {
+            params.changes.config = true;
+          }
+
+          if (params.changeData.containerList > params.TimeStamp) {
+            params.changes.containerlist = true;
+          }
+
+          if (params.changeData.containerConfig > params.TimeStamp) {
+            params.changes.containerconfig = true;
+          }
+
+          if (params.changeData.routing > params.TimeStamp) {
+            params.changes.routing = true;
+          }
+
+          if (params.changeData.registeries > params.TimeStamp) {
+            params.changes.registeries = true;
+          }
+          callback(null,params);
+        // }
+        // else
+        // {
+        //   callback('Error',);
+
+        // }
+        //   // Updates the fabric with the fabricConfig based on the fabrics instanceId
+        //   FabricManager
+        //   .updateFabricConfig(params.instanceId, fabricConfig)
+        //   .then(AppUtils.onUpdate.bind(null, params, 'No Record Updated', callback));
+        // }
+}
 
 export default router;

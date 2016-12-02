@@ -9,6 +9,7 @@ const getFabricTypeDetail = function(props, params, callback) {
     .then(AppUtils.onCreate.bind(null, params, props.setProperty, 'Unable to read fabric type detail', callback));
 }
 
+
 export default {
   getFabricTypeDetail: getFabricTypeDetail
 

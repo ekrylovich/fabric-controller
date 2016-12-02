@@ -6,7 +6,7 @@
 
 import Sequelize from 'sequelize';
 import sequelize from './../utils/sequelize';
-import FabricProvisionKey from './fabricProvisionKey';
+//import FabricProvisionKey from './fabricProvisionKey';
 import ChangeTracking from './changeTracking';
 import FabricType from './fabricType';
 
@@ -186,7 +186,7 @@ const Fabric = sequelize.define('iofabrics', {
   underscored: true
 });
 
-FabricProvisionKey.belongsTo(Fabric);
+//FabricProvisionKey.belongsTo(Fabric);
 Fabric.belongsTo(FabricType, {
   foreignKey: 'typeKey'
 })

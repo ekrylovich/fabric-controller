@@ -127,10 +127,12 @@ const onCreate = function(params, paramName, errorMsg, callback, modelObject) {
 }
 
 const onFind = function(params, paramName, errorMsg, callback, modelObject) {
+
   if (modelObject) {
     if (paramName) {
       params[paramName] = modelObject;
     }
+
     callback(null, params);
 
   } else {
@@ -142,7 +144,6 @@ const onFind = function(params, paramName, errorMsg, callback, modelObject) {
 const onFindOptional = function(params, paramName, callback, modelObject) {
   if (modelObject && paramName) {
     params[paramName] = modelObject;
-
   }
 
   callback(null, params);
@@ -160,10 +161,12 @@ const onUpdate = function(params, errorMsg, callback, updatedModels) {
 
 const onDelete = function(params, errorMsg, callback, deletedModels) {
   if (deletedModels <= 0) {
-    console.log(errorMsg);
+     callback('error', errorMsg);
   }
-
-  callback(null, params);
+  else
+  {
+    callback(null, params);
+  }
 }
 
 const sendResponse = function(response, err, successLabel, successValue, errorMessage) {
@@ -177,10 +180,34 @@ const sendResponse = function(response, err, successLabel, successValue, errorMe
     res['errormessage'] = errorMessage;
   } else {
     res['status'] = 'ok';
+    if (successLabel!=null)
+    {
     res[successLabel] = successValue;
+    }
   }
   response.send(res);
 }
+
+const sendMultipleResponse = function(response, err, successLabelArr, successValueArr, errorMessage) {
+  var res = {
+    'timestamp': new Date().getTime()
+  };
+
+  response.status(200);
+  if (err) {
+    res['status'] = 'failure';
+    res['errormessage'] = errorMessage;
+  } else {
+
+  for(var i=0; i<successLabelArr.length; i++) {
+    res['status'] = 'ok';
+    res[successLabelArr[i]] = successValueArr[i];
+  }
+  response.send(res);
+}
+}
+
+
 
 export default {
   isArray: isArray,
@@ -197,5 +224,6 @@ export default {
   onFind: onFind,
   onFindOptional: onFindOptional,
   onDelete: onDelete,
-  sendResponse: sendResponse
+  sendResponse: sendResponse,
+  sendMultipleResponse : sendMultipleResponse
 };

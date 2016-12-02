@@ -6,7 +6,7 @@
 
 import Sequelize from 'sequelize';
 import sequelize from './../utils/sequelize';
-// import Fabric from './fabric';
+import Fabric from './fabric';
 
 const FabricProvisionKey = sequelize.define('iofabric_provision_keys', {
   id: {type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true, field: 'ID'},
@@ -22,5 +22,7 @@ const FabricProvisionKey = sequelize.define('iofabric_provision_keys', {
   // so updatedAt will be updated_at
   underscored: true
 });
+
+FabricProvisionKey.belongsTo(Fabric);
 
 export default FabricProvisionKey;

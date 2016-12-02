@@ -34,8 +34,16 @@ const updateConfigTracking = function(params, callback) {
   }
 }
 
+const findByInstanceId= function(props, params, callback) {
+
+ ChangeTrackingManager
+ .findByInstanceId(params.instanceId)
+ .then(AppUtils.onFind.bind(null, params, props.setProperty, props.error, callback));
+ }
+
 export default {
   initiateFabricChangeTracking: initiateFabricChangeTracking,
   updateChangeTracking: updateChangeTracking,
-  updateConfigTracking: updateConfigTracking
+  updateConfigTracking: updateConfigTracking,
+  findByInstanceId: findByInstanceId
 };
