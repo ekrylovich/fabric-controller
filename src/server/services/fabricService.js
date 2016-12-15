@@ -58,9 +58,17 @@ const updateFogInstance = function(params, callback) {
       .then(AppUtils.onUpdate.bind(null, params, 'Unable to update Fog Instance', callback));
 }
 
+const deleteFogInstance = function(props, params, callback) {
+  var instanceId = AppUtils.getProperty(params, props.instanceId);
+  
+  FabricManager
+    .deleteByInstanceId(instanceId)
+    .then(AppUtils.onDelete.bind(null, params, 'Unable to delete Fabric', callback));
+}
 
 export default {
   getFogInstance: getFogInstance,
   createFabricInstance: createFabricInstance,
-  updateFogInstance: updateFogInstance
+  updateFogInstance: updateFogInstance,
+  deleteFogInstance: deleteFogInstance
 };
